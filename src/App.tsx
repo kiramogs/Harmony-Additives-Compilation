@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import './App.css'
 
 const officialLinks = [
@@ -28,27 +29,68 @@ const officialLinks = [
   },
 ]
 
+const MOBILE_QUERY = '(max-width: 767px)'
+const DESKTOP_INTRO_SECONDS = 5
+
 function App() {
   const year = new Date().getFullYear()
+  const [isGlassVisible, setIsGlassVisible] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+    return window.matchMedia(MOBILE_QUERY).matches
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const mediaQuery = window.matchMedia(MOBILE_QUERY)
+    const syncDeviceMode = (event: MediaQueryListEvent) => setIsMobile(event.matches)
+
+    setIsMobile(mediaQuery.matches)
+    mediaQuery.addEventListener('change', syncDeviceMode)
+    return () => mediaQuery.removeEventListener('change', syncDeviceMode)
+  }, [])
+
+  const backgroundVideoSrc = isMobile ? '/harmony-bg-mobile.mp4' : '/harmony-bg-desktop.mp4'
+  const handleIntroComplete = () => setIsGlassVisible(true)
 
   return (
     <div className="scene">
-      <div className="scene-photo" aria-hidden="true" />
-      <div className="scene-fade" aria-hidden="true" />
+      <video
+        key={backgroundVideoSrc}
+        className="scene-video"
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        onEnded={handleIntroComplete}
+        onError={handleIntroComplete}
+        onTimeUpdate={(event) => {
+          if (isMobile || isGlassVisible) {
+            return
+          }
 
-      <main className="glass-shell">
+          if (event.currentTarget.currentTime >= DESKTOP_INTRO_SECONDS) {
+            event.currentTarget.pause()
+            handleIntroComplete()
+          }
+        }}
+      >
+        <source src={backgroundVideoSrc} type="video/mp4" />
+      </video>
+
+      <main className={`glass-shell ${isGlassVisible ? 'glass-shell-visible' : 'glass-shell-hidden'}`}>
         <header className="shell-header">
           <div className="brand-wrap">
             <img src="/harmony-mark.svg" alt="" aria-hidden="true" className="brand-mark" />
-            <div>
-              <p className="brand">Harmony Additives</p>
-              <p className="brand-sub">Official Link Hub</p>
-            </div>
+            <p className="brand">Harmony Additives</p>
           </div>
-          <span className="status-dot" aria-label="Live links" />
         </header>
-
-        <p className="intro">All official Harmony Additives links in one place.</p>
 
         <section className="buttons-grid">
           {officialLinks.map((item) => (
