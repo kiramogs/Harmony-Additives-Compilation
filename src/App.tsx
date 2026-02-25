@@ -30,7 +30,11 @@ const officialLinks = [
 ]
 
 const MOBILE_QUERY = '(max-width: 767px)'
-const DESKTOP_INTRO_SECONDS = 5
+const MOBILE_INTRO_SECONDS = 5.5
+const MOBILE_VIDEO_SRC =
+  '/veo-3.1-fast-generate-preview_animate_this_in_minimalistic_yet_aesthetic_manner_it_is_gonna_be_a_the_website_o-0.mp4'
+const DESKTOP_VIDEO_SRC =
+  '/kling-video-o-1_6-second_seamless_loop._Pastel_watercolor_paper_with_visible_cold-pressed_textur-0.mp4'
 
 function App() {
   const year = new Date().getFullYear()
@@ -55,7 +59,11 @@ function App() {
     return () => mediaQuery.removeEventListener('change', syncDeviceMode)
   }, [])
 
-  const backgroundVideoSrc = isMobile ? '/harmony-bg-mobile.mp4' : '/harmony-bg-desktop.mp4'
+  useEffect(() => {
+    setIsGlassVisible(!isMobile)
+  }, [isMobile])
+
+  const backgroundVideoSrc = isMobile ? MOBILE_VIDEO_SRC : DESKTOP_VIDEO_SRC
   const handleIntroComplete = () => setIsGlassVisible(true)
 
   return (
@@ -71,11 +79,11 @@ function App() {
         onEnded={handleIntroComplete}
         onError={handleIntroComplete}
         onTimeUpdate={(event) => {
-          if (isMobile || isGlassVisible) {
+          if (!isMobile || isGlassVisible) {
             return
           }
 
-          if (event.currentTarget.currentTime >= DESKTOP_INTRO_SECONDS) {
+          if (event.currentTarget.currentTime >= MOBILE_INTRO_SECONDS) {
             event.currentTarget.pause()
             handleIntroComplete()
           }
