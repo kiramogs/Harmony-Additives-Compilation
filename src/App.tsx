@@ -59,12 +59,12 @@ function App() {
     return () => mediaQuery.removeEventListener('change', syncDeviceMode)
   }, [])
 
-  useEffect(() => {
-    setIsGlassVisible(!isMobile)
-  }, [isMobile])
-
   const backgroundVideoSrc = isMobile ? MOBILE_VIDEO_SRC : DESKTOP_VIDEO_SRC
   const handleIntroComplete = () => setIsGlassVisible(true)
+
+  useEffect(() => {
+    setIsGlassVisible(false)
+  }, [backgroundVideoSrc])
 
   return (
     <div className="scene">
